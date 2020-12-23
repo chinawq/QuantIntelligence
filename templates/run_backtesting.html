@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Run BackTesting{% endblock %}
+
+{% block css %}
+<!-- Select2 -->
+<link rel="stylesheet" href="{% static 'AdminLTE-3.0.5/plugins/select2/css/select2.min.css' %}">
+<link rel="stylesheet" href="{% static 'AdminLTE-3.0.5/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css' %}">
+<!-- Theme style -->
+<link rel="stylesheet" href="{% static 'AdminLTE-3.0.5/dist/css/adminlte.min.css' %}">
+{% endblock %}
+
+{% block breadcrumb %}Run BackTesting{% endblock %}
+{% block breadcrumb-2 %}Run BackTesting{% endblock %}
+
+
+{% block content %}
+<div class="card card-default">
+    <div class="card-header">
+      <h3 class="card-title">Select strategies and datasets</h3>
+
+      <!-- <div class="card-tools">
+        <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+        <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
+      </div> -->
+    </div>
+    <!-- /.card-header -->
+    <form class="form-horizontal" id="backtest_task_submit_form" action="/run_backtesting/" method="POST"> 
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="task_name">Task Name</label>
+                <input type="text" class="form-control" id="task_name" name="task_name"  placeholder="" required>
+            </div>
+          <div class="form-group">
+            <label>Strategy</label>
+            <select class="select2" multiple="multiple" data-placeholder="Select a strategy" name="selected_stg" style="width: 100%;">
+                {% for stg in stg_list %}
+                    <option>{{ stg.stg_name }}({{ stg.stg_description }})</option>
+                {% endfor %}
+            </select>
+          </div>
+          <!-- /.form-group -->
+          <div class="form-group">
+            
+          </div>
+          <!-- /.form-group -->
+        </div>
+        <!-- /.col -->
+        <div class="col-md-6">
+          <div class="form-group">
+            <label>Dataset</label>
+            <select class="select2" multiple="multiple" data-placeholder="Select a dataset" name="selected_dataset" style="width: 100%;">
+            {% for dt in data_list %}
+                <option>{{ dt.name }}({{ dt.code }})</option>
+            {% endfor %}
+            </select>
+          </div>
+          <!-- /.form-group -->
+          <div class="form-group">
+              <label>Backtesting Policy</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="standalone_checkbox">
+                <label class="form-check-label">Standalone(Single strategy on single dataset)</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="combined_chechbox">
+                <label class="form-check-label">Combined(All strategies on single dataset)</label>
+            </div>
+          </div>
+          <!-- /.form-group -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </div>
+    <!-- /.card-body -->
+    {% csrf_token %}
+    <div class="card-footer">
+        <button type="submit" class="btn btn-primary float-right">Submit</button>
+    </div>
+    </form>
+  </div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'AdminLTE-3.0.5/plugins/jquery/jquery.form.min.js' %}"></script>
+<!-- Select2 -->
+<script src="{% static 'AdminLTE-3.0.5/plugins/select2/js/select2.full.min.js' %}"></script>
+
+<script>
+    $(function () {
+      //Initialize Select2 Elements
+      $('.select2').select2();
+    })
+  </script>
+{% endblock %}

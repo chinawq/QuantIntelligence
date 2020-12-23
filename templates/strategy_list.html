@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Strategy List{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'AdminLTE-3.0.5/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+<link rel="stylesheet" href="{% static 'AdminLTE-3.0.5/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
+{% endblock %}
+
+{% block breadcrumb %}Strategy List{% endblock %}
+{% block breadcrumb-2 %}Strategy List{% endblock %}
+
+{% block modal_page %}
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Upload New Strategy</h4>
+            <button type="button" class="close  float-right" data-dismiss="modal" aria-hidden="true">&times;</button>
+          </div>
+          <div class="modal-body">
+              <form class="form-horizontal" id="stg_upload_form"  enctype="multipart/form-data"> 
+                <!-- action="/upload_strategy/" method="post" -->
+                  <div class="card-body">
+                      <div class="form-group">
+                          <label for="stg_name">Strategy Name</label>
+                          <input type="text" class="form-control" id="stg_name" name="stg_name"  placeholder="" required>
+                      </div>
+                      <div class="form-group">
+                          <label>Strategy Description</label>
+                          <textarea class="form-control" name="stg_description" rows="3" placeholder=""></textarea>
+                      </div>
+                      <div class="form-group">
+                        <label for="stg_file">File input</label>
+                        <div class="input-group">
+                          <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="stg_file" name="stg_file" required>
+                            <label class="custom-file-label" for="stg_file">Choose file</label>
+                          </div>
+                          <!-- <div class="input-group-append">
+                            <span class="input-group-text" id="">Upload</span>
+                          </div> -->
+                        </div>
+                      </div>
+                  </div>
+                  {% csrf_token %}
+                  <!-- /.card-body -->
+                  <div class="card-footer">
+                      <button type="button" class="btn btn-info" data-dismiss="modal">Cancel</button>
+                      <button type="submit" class="btn btn-primary float-right">Submit</button>
+                  </div>
+                  <!-- /.card-footer -->
+              </form>
+          </div>
+      </div><!-- /.modal-content -->
+  </div><!-- /.modal -->
+</div>
+
+
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+      <div class="btn-group float-right">
+          <button type="button" class="btn btn-primary" id="add_stg_btn" data-toggle="modal" data-target="#myModal">Add New Strategy</button>
+          <!-- <button type="button" class="btn btn-info">Info</button> -->
+      </div>
+
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+      <table id="stg_list" class="table table-bordered table-striped">
+        <thead>
+        <tr>
+          <th>Strategy Name</th>
+          <th>Description</th>
+          <th>Create Time</th>
+          <th>Last Modify</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for stg in stg_list %}
+            <tr>
+                <td>{{ stg.stg_name }}</td>
+                <td>{{ stg.stg_description }}</td>
+                <td>{{ stg.stg_create_time}}</td>
+                <td>{{ stg.stg_modify_time }}</td>
+                <td>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-default" id="view_btn">View</button>
+                    <button type="button" class="btn btn-default" id="modify_btn">Modify</button>
+                    <button type="button" class="btn btn-danger" id="delete_btn">Delete</button>
+                  </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>No strategy right now!</tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <!-- /.card-body -->
+</div>
+
+
+{% endblock %}
+
+
+{% block script %}
+<script src="{% static 'AdminLTE-3.0.5/plugins/jquery/jquery.form.min.js' %}"></script>
+<script src="{% static 'AdminLTE-3.0.5/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'AdminLTE-3.0.5/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'AdminLTE-3.0.5/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'AdminLTE-3.0.5/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script>
+    $(function () {
+      if ($("#stg_list").children("tbody").children("tr").first().html()){
+        $("#stg_list").DataTable({
+        "responsive": true,
+        "autoWidth": false
+        });
+      }
+  
+      $("button#delete_btn").click(function(){
+        var param = $.param({action:"delete", stg_name:$(this).parentsUntil("tbody").children("td.sorting_1").text()})
+        $.ajax({
+          type:"POST",
+          url:"/strategy_list/",
+          data:param+ "&csrfmiddlewaretoken=" + $.cookie('csrftoken'),
+          success : function(result) {
+                window.location.reload();
+            }
+        });
+      });
+
+      // $("button#add_stg_btn").click(function(){
+      //   console.log('click event');
+      // });
+      $(".custom-file").on("change","input[type='file']", function(){
+        var file_path=$(this).val();
+        if(file_path.length>0){
+          var arr=file_path.split('\\');
+          var fileName=arr[arr.length-1];
+          $("label.custom-file-label").html(fileName);
+        }
+      });
+      $("#stg_upload_form").submit(function(){
+        $("#stg_upload_form").ajaxSubmit({
+          url: "/upload_strategy/",
+          type: "post",
+          success : function(result) {
+                if(result=="succeed"){
+                  window.location.reload();
+                }
+                else{
+                  if($("#stg_upload_form").children(".card-body").children("p").length==0){
+                    $("#stg_upload_form").children(".card-body").append("<p style='color:red'>"+result+"</p>");
+                  }
+                  $("#stg_name").addClass("is-invalid");
+                }
+            }
+        });
+        return false;
+      });
+
+    });
+
+
+  </script>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Data List{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'AdminLTE-3.0.5/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css' %}">
+<link rel="stylesheet" href="{% static 'AdminLTE-3.0.5/plugins/datatables-responsive/css/responsive.bootstrap4.min.css' %}">
+{% endblock %}
+
+{% block breadcrumb %}Data List{% endblock %}
+{% block breadcrumb-2 %}Data List{% endblock %}
+
+{% block modal_page %}
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title" id="myModalLabel">Upload New Strategy</h4>
+            <button type="button" class="close  float-right" data-dismiss="modal" aria-hidden="true">&times;</button>
+          </div>
+          <div class="modal-body">
+              <form class="form-horizontal" id="data_upload_form"  enctype="multipart/form-data"> 
+                <!-- action="/upload_strategy/" method="post" -->
+                  <div class="card-body">
+                      <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="data_name">Name</label>
+                                <input type="text" class="form-control" id="data_name" name="data_name"  placeholder="" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="data_code">Code</label>
+                                <input type="text" class="form-control" id="data_code" name="data_code"  placeholder="" required>
+                            </div>
+                            </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="data_type">Type</label>
+                                <select class="form-control custom-select" id="data_type" name="data_type">
+                                    <option>Security</option>
+                                    <option>Futures</option>
+                                    <option>Options</option>
+                                    <option>ETF</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="data_freq">Frequency</label>
+                                <select class="form-control custom-select" id="data_freq" name="data_freq">
+                                    <option>1 min</option>
+                                    <option>5 min</option>
+                                    <option>10 min</option>
+                                    <option>15 min</option>
+                                    <option>30 min</option>
+                                    <option>60 min</option>
+                                    <option>120 min</option>
+                                    <option>1 day</option>
+                                    <option>1 week</option>
+                                    <option>1 month</option>
+                                    <option>1 year</option>
+                                </select>
+                            </div>
+                            </div>
+                      </div>
+                    
+                      <div class="form-group">
+                        <label for="data_file">File input</label>
+                        <div class="input-group">
+                          <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="data_file" name="data_file" required>
+                            <label class="custom-file-label" for="data_file">Choose file</label>
+                          </div>
+                          <!-- <div class="input-group-append">
+                            <span class="input-group-text" id="">Upload</span>
+                          </div> -->
+                        </div>
+                      </div>
+                  </div>
+                  {% csrf_token %}
+                  <!-- /.card-body -->
+                  <div class="card-footer">
+                      <button type="button" class="btn btn-info" data-dismiss="modal">Cancel</button>
+                      <button type="submit" class="btn btn-primary float-right">Submit</button>
+                  </div>
+                  <!-- /.card-footer -->
+              </form>
+          </div>
+      </div><!-- /.modal-content -->
+  </div><!-- /.modal -->
+</div>
+
+
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+      <div class="btn-group float-right">
+          <button type="button" class="btn btn-primary" id="add_stg_btn" data-toggle="modal" data-target="#myModal">Import New Data</button>
+          <!-- <button type="button" class="btn btn-info">Info</button> -->
+      </div>
+
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+      <table id="data_list" class="table table-bordered table-striped">
+        <thead>
+        <tr>
+          <th>Name</th>
+          <th>Code</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Frequency</th>
+          <th>Data Type</th>
+          <th>Ownership</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+            {% for dt in data_list %}
+            <tr>
+                <td>{{ dt.name }}</td>
+                <td>{{ dt.code }}</td>
+                <td>{{ dt.start_date}}</td>
+                <td>{{ dt.end_date}}</td>
+                <td>{{ dt.data_frequency}}</td>
+                <td>{{ dt.data_type}}</td>
+                <td>{{ dt.data_owner }}</td>
+                <td>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-default" id="view_btn">View</button>
+                    <button type="button" class="btn btn-default" id="modify_btn">Modify</button>
+                    <button type="button" class="btn btn-danger" id="delete_btn">Delete</button>
+                  </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>No data right now!</tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <!-- /.card-body -->
+</div>
+
+
+{% endblock %}
+
+
+{% block script %}
+<script src="{% static 'AdminLTE-3.0.5/plugins/jquery/jquery.form.min.js' %}"></script>
+<script src="{% static 'AdminLTE-3.0.5/plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'AdminLTE-3.0.5/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'AdminLTE-3.0.5/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'AdminLTE-3.0.5/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+
+<script>
+    $(function () {
+      if ($("#data_list").children("tbody").children("tr").first().html()){
+        $("#data_list").DataTable({
+        "responsive": true,
+        "autoWidth": false
+        });
+      }
+  
+      $("button#delete_btn").click(function(){
+        var param = $.param({action:"delete", data_name:$(this).parentsUntil("tbody").children("td.sorting_1").text()})
+        $.ajax({
+          type:"POST",
+          url:"/data_list/",
+          data:param+ "&csrfmiddlewaretoken=" + $.cookie('csrftoken'),
+          success : function(result) {
+                window.location.reload();
+            }
+        });
+      });
+
+      // $("button#add_stg_btn").click(function(){
+      //   console.log('click event');
+      // });
+      $(".custom-file").on("change","input[type='file']", function(){
+        var file_path=$(this).val();
+        if(file_path.length>0){
+          var arr=file_path.split('\\');
+          var fileName=arr[arr.length-1];
+          $("label.custom-file-label").html(fileName);
+        }
+      });
+      $("#data_upload_form").submit(function(){
+        $("#data_upload_form").ajaxSubmit({
+          url: "/import_hist_data/",
+          type: "post",
+          success : function(result) {
+                if(result=="succeed"){
+                  window.location.reload();
+                }
+                else{
+                  if($("#data_upload_form").children(".card-body").children("p").length==0){
+                    $("#data_upload_form").children(".card-body").append("<p style='color:red'>"+result+"</p>");
+                  }
+                  $("#data_name").addClass("is-invalid");
+                }
+            }
+        });
+        return false;
+      });
+
+    });
+
+
+  </script>
+{% endblock %}
